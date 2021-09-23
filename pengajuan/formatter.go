@@ -1,14 +1,12 @@
 package pengajuan
 
-import "time"
-
 type PengajuanFormatter struct {
 	ID                 int                           `json:"id"`
 	UserID             int                           `json:"user_id"`
 	Nik                string                        `json:"nik"`
 	NamaLengkap        string                        `json:"nama_lengkap"`
 	TempatLahir        string                        `json:"tempat_lahir"`
-	TanggalLahir       time.Time                     `json:"tanggal_lahir"`
+	TanggalLahir       string                        `json:"tanggal_lahir"`
 	Alamat             string                        `json:"alamat"`
 	Pekerjaan          string                        `json:"pekerjaan"`
 	PendapatanPerbulan int                           `json:"pendapatan_per_bulan"`

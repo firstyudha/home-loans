@@ -3,7 +3,6 @@ package pengajuan
 import (
 	"home-loans/kelengkapan"
 	"home-loans/user"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -15,7 +14,7 @@ type Pengajuan struct {
 	Nik                string
 	NamaLengkap        string
 	TempatLahir        string
-	TanggalLahir       time.Time
+	TanggalLahir       string
 	Alamat             string
 	Pekerjaan          string
 	PendapatanPerbulan int
@@ -24,4 +23,12 @@ type Pengajuan struct {
 	Status             string
 	Kelengkapan        kelengkapan.Kelengkapan
 	User               user.User
+}
+
+type BuktiKtp struct {
+	BuktiKtp string
+}
+
+type BuktiSlipGaji struct {
+	BuktiSlipGaji string
 }
