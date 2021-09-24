@@ -59,8 +59,8 @@ func main() {
 	//pengajuan endpoint
 	api.GET("/pengajuan", authMiddleware(authService, userService), pengajuanHandler.GetPengajuans)
 	api.POST("/pengajuan", authMiddleware(authService, userService), pengajuanHandler.CreatePengajuan)
-	api.PUT("/pengajuan/bukti-ktp/:id", authMiddleware(authService, userService), pengajuanHandler.UploadBuktiKtp)
-	api.PUT("/pengajuan/bukti-slip-gaji/:id", authMiddleware(authService, userService), pengajuanHandler.UploadBuktiSlipGaji)
+	api.PUT("/pengajuan/bukti-ktp", authMiddleware(authService, userService), pengajuanHandler.UploadBuktiKtp)
+	api.PUT("/pengajuan/bukti-slip-gaji", authMiddleware(authService, userService), pengajuanHandler.UploadBuktiSlipGaji)
 
 	//kelengkapan endpoint
 	api.GET("/kelengkapan", authMiddleware(authService, userService), kelengkapanHandler.GetKelengkapans)

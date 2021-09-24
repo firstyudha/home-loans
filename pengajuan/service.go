@@ -5,8 +5,8 @@ import "errors"
 type Service interface {
 	GetPengajuans(userID int) ([]Pengajuan, error)
 	CreatePengajuan(input CreatePengajuanInput) (Pengajuan, error)
-	SaveBuktiKTP(inputID GetPengajuanInput, fileLocation string) (Pengajuan, error)
-	SaveBuktiSlipGaji(inputID GetPengajuanInput, fileLocation string) (Pengajuan, error)
+	SaveBuktiKTP(inputID int, fileLocation string) (Pengajuan, error)
+	SaveBuktiSlipGaji(inputID int, fileLocation string) (Pengajuan, error)
 }
 
 type service struct {
@@ -65,8 +65,8 @@ func (s *service) CreatePengajuan(input CreatePengajuanInput) (Pengajuan, error)
 	return newPengajuan, nil
 }
 
-func (s *service) SaveBuktiKTP(inputID GetPengajuanInput, fileLocation string) (Pengajuan, error) {
-	pengajuan, err := s.repository.FindByID(inputID.ID)
+func (s *service) SaveBuktiKTP(userID int, fileLocation string) (Pengajuan, error) {
+	pengajuan, err := s.repository.FindByID(userID)
 	if err != nil {
 		return Pengajuan{}, err
 	}
@@ -81,8 +81,8 @@ func (s *service) SaveBuktiKTP(inputID GetPengajuanInput, fileLocation string) (
 	return updatedPengajuan, nil
 }
 
-func (s *service) SaveBuktiSlipGaji(inputID GetPengajuanInput, fileLocation string) (Pengajuan, error) {
-	pengajuan, err := s.repository.FindByID(inputID.ID)
+func (s *service) SaveBuktiSlipGaji(userID int, fileLocation string) (Pengajuan, error) {
+	pengajuan, err := s.repository.FindByID(userID)
 	if err != nil {
 		return Pengajuan{}, err
 	}

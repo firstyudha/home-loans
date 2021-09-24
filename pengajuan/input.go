@@ -10,7 +10,7 @@ type GetPengajuanInput struct {
 
 type CreatePengajuanInput struct {
 	Nik                string `json:"nik" binding:"required"`
-	UserID             int    `json:"user_id" binding:"required"`
+	UserID             int    `json:"user_id"`
 	NamaLengkap        string `json:"nama_lengkap" binding:"required"`
 	TempatLahir        string `json:"tempat_lahir" binding:"required"`
 	TanggalLahir       string `json:"tanggal_lahir" binding:"required"`

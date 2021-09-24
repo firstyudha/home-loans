@@ -49,12 +49,14 @@ func (h *pengajuanHandler) CreatePengajuan(c *gin.Context) {
 		return
 	}
 
-	//status default 1 = diajukkan
-	input.Status = "1"
-
 	currentUser := c.MustGet("currentUser").(user.User)
 
 	input.User = currentUser
+
+	input.UserID = currentUser.ID
+
+	//status default 1 = diajukkan
+	input.Status = "1"
 
 	newPengajuan, err := h.pengajuanService.CreatePengajuan(input)
 	if err != nil {
@@ -69,23 +71,8 @@ func (h *pengajuanHandler) CreatePengajuan(c *gin.Context) {
 }
 
 func (h *pengajuanHandler) UploadBuktiKtp(c *gin.Context) {
-	var inputID pengajuan.GetPengajuanInput
-
-	err := c.ShouldBindUri(&inputID)
-
-	var inputData pengajuan.CreatePengajuanInput
-
-	if err != nil {
-		errors := helper.FormatValidationError(err)
-		errorMessage := gin.H{"errors": errors}
-
-		response := helper.APIResponse("Failed to upload bukti ktp", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
 
 	currentUser := c.MustGet("currentUser").(user.User)
-	inputData.User = currentUser
 	userID := currentUser.ID
 
 	file, err := c.FormFile("bukti_ktp")
@@ -110,7 +97,7 @@ func (h *pengajuanHandler) UploadBuktiKtp(c *gin.Context) {
 		return
 	}
 
-	_, err = h.pengajuanService.SaveBuktiKTP(inputID, path)
+	_, err = h.pengajuanService.SaveBuktiKTP(userID, path)
 	if err != nil {
 		data := gin.H{"is_uploaded": false}
 		response := helper.APIResponse("Failed to upload bukti ktp", http.StatusBadRequest, "error", data)
@@ -126,23 +113,8 @@ func (h *pengajuanHandler) UploadBuktiKtp(c *gin.Context) {
 }
 
 func (h *pengajuanHandler) UploadBuktiSlipGaji(c *gin.Context) {
-	var inputID pengajuan.GetPengajuanInput
-
-	err := c.ShouldBindUri(&inputID)
-
-	var inputData pengajuan.CreatePengajuanInput
-
-	if err != nil {
-		errors := helper.FormatValidationError(err)
-		errorMessage := gin.H{"errors": errors}
-
-		response := helper.APIResponse("Failed to upload bukti slip gaji", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
 
 	currentUser := c.MustGet("currentUser").(user.User)
-	inputData.User = currentUser
 	userID := currentUser.ID
 
 	file, err := c.FormFile("bukti_slip_gaji")
@@ -167,7 +139,7 @@ func (h *pengajuanHandler) UploadBuktiSlipGaji(c *gin.Context) {
 		return
 	}
 
-	_, err = h.pengajuanService.SaveBuktiSlipGaji(inputID, path)
+	_, err = h.pengajuanService.SaveBuktiSlipGaji(userID, path)
 	if err != nil {
 		data := gin.H{"is_uploaded": false}
 		response := helper.APIResponse("Failed to upload bukti slip gaji", http.StatusBadRequest, "error", data)

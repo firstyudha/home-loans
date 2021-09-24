@@ -1,8 +1,6 @@
 package kelengkapan
 
 import (
-	"home-loans/user"
-
 	"gorm.io/gorm"
 )
 
@@ -16,7 +14,6 @@ type Kelengkapan struct {
 	JangkaPembayaran int
 	DokumenPendukung string
 	Status           string
-	User             user.User
 }
 
 type DokumenPendukung struct {
