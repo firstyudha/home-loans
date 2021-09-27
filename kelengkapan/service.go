@@ -4,8 +4,8 @@ import "errors"
 
 type Service interface {
 	GetKelengkapans(userID int) ([]Kelengkapan, error)
-	CreateKelengkapan(input CreateKelengkapanInput) (Kelengkapan, error)
-	SaveDokumenPendukung(inputID GetKelengkapanInput, fileLocation string) (Kelengkapan, error)
+	CreateKelengkapan(userID int, input CreateKelengkapanInput) (Kelengkapan, error)
+	SaveDokumenPendukung(UserID int, fileLocation string) (Kelengkapan, error)
 }
 
 type service struct {
@@ -34,16 +34,22 @@ func (s *service) GetKelengkapans(PengajuanID int) ([]Kelengkapan, error) {
 	return kelengkapans, nil
 }
 
-func (s *service) CreateKelengkapan(input CreateKelengkapanInput) (Kelengkapan, error) {
+func (s *service) CreateKelengkapan(userID int, input CreateKelengkapanInput) (Kelengkapan, error) {
 	kelengkapan := Kelengkapan{}
-	kelengkapan.PengajuanID = input.PengajuanID
+	pengajuan_id, err := s.repository.FindPengajuanByUserID(userID)
+
+	if err != nil {
+		return kelengkapan, err
+	}
+
+	kelengkapan.PengajuanID = pengajuan_id
 	kelengkapan.AlamatRumah = input.AlamatRumah
 	kelengkapan.LuasRumah = input.LuasRumah
 	kelengkapan.HargaRumah = input.HargaRumah
 	kelengkapan.JangkaPembayaran = input.JangkaPembayaran
 	kelengkapan.Status = input.Status
 
-	isKelengkapanExist, err := s.repository.FindByPengajuanID(input.PengajuanID)
+	isKelengkapanExist, err := s.repository.FindByPengajuanID(pengajuan_id)
 
 	if err != nil {
 		return kelengkapan, err
@@ -61,8 +67,15 @@ func (s *service) CreateKelengkapan(input CreateKelengkapanInput) (Kelengkapan, 
 	return newKelengkapan, nil
 }
 
-func (s *service) SaveDokumenPendukung(inputID GetKelengkapanInput, fileLocation string) (Kelengkapan, error) {
-	kelengkapan, err := s.repository.FindByID(inputID.PengajuanID)
+func (s *service) SaveDokumenPendukung(userID int, fileLocation string) (Kelengkapan, error) {
+	//find pengajuan id by user id
+	pengajuan_id, err := s.repository.FindPengajuanByUserID(userID)
+	if err != nil {
+		return Kelengkapan{}, err
+	}
+
+	//find kelengkapan by pengajua id
+	kelengkapan, err := s.repository.FindByID(pengajuan_id)
 	if err != nil {
 		return Kelengkapan{}, err
 	}

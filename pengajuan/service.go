@@ -5,8 +5,8 @@ import "errors"
 type Service interface {
 	GetPengajuans(userID int) ([]Pengajuan, error)
 	CreatePengajuan(input CreatePengajuanInput) (Pengajuan, error)
-	SaveBuktiKTP(inputID int, fileLocation string) (Pengajuan, error)
-	SaveBuktiSlipGaji(inputID int, fileLocation string) (Pengajuan, error)
+	SaveBuktiKTP(userID int, fileLocation string) (Pengajuan, error)
+	SaveBuktiSlipGaji(userID int, fileLocation string) (Pengajuan, error)
 }
 
 type service struct {

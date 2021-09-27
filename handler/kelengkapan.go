@@ -56,7 +56,7 @@ func (h *kelengkapanHandler) CreateKelengkapan(c *gin.Context) {
 
 	input.User = currentUser
 
-	newKelengkapan, err := h.kelengkapanService.CreateKelengkapan(input)
+	newKelengkapan, err := h.kelengkapanService.CreateKelengkapan(currentUser.ID, input)
 	if err != nil {
 		data := gin.H{"error": err.Error()}
 		response := helper.APIResponse("Failed to create kelengkapan", http.StatusBadRequest, "error", data)
@@ -69,23 +69,8 @@ func (h *kelengkapanHandler) CreateKelengkapan(c *gin.Context) {
 }
 
 func (h *kelengkapanHandler) UploadDokumenPendukung(c *gin.Context) {
-	var inputID kelengkapan.GetKelengkapanInput
-
-	err := c.ShouldBindUri(&inputID)
-
-	var inputData kelengkapan.CreateKelengkapanInput
-
-	if err != nil {
-		errors := helper.FormatValidationError(err)
-		errorMessage := gin.H{"errors": errors}
-
-		response := helper.APIResponse("Failed to upload dokumen pendukung", http.StatusUnprocessableEntity, "error", errorMessage)
-		c.JSON(http.StatusUnprocessableEntity, response)
-		return
-	}
 
 	currentUser := c.MustGet("currentUser").(user.User)
-	inputData.User = currentUser
 	userID := currentUser.ID
 
 	file, err := c.FormFile("dokumen_pendukung")
@@ -110,7 +95,7 @@ func (h *kelengkapanHandler) UploadDokumenPendukung(c *gin.Context) {
 		return
 	}
 
-	_, err = h.kelengkapanService.SaveDokumenPendukung(inputID, path)
+	_, err = h.kelengkapanService.SaveDokumenPendukung(userID, path)
 	if err != nil {
 		data := gin.H{"is_uploaded": false}
 		response := helper.APIResponse("Failed to upload dokumen pendukung", http.StatusBadRequest, "error", data)

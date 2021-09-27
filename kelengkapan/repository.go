@@ -1,11 +1,14 @@
 package kelengkapan
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Repository interface {
 	FindAll() ([]Kelengkapan, error)
 	FindByPengajuanID(pengajuanID int) ([]Kelengkapan, error)
 	FindByID(pengajuanID int) (Kelengkapan, error)
+	FindPengajuanByUserID(userID int) (int, error)
 	Save(kelengkapan Kelengkapan) (Kelengkapan, error)
 	Update(kelengkapan Kelengkapan) (Kelengkapan, error)
 }
@@ -21,7 +24,7 @@ func NewRepository(db *gorm.DB) *repository {
 func (r *repository) FindAll() ([]Kelengkapan, error) {
 	var kelengkapans []Kelengkapan
 
-	err := r.db.Preload("User").Preload("Kelengkapan").Find(&kelengkapans).Error
+	err := r.db.Find(&kelengkapans).Error
 	if err != nil {
 		return kelengkapans, err
 	}
@@ -32,7 +35,7 @@ func (r *repository) FindAll() ([]Kelengkapan, error) {
 func (r *repository) FindByPengajuanID(pengajuanID int) ([]Kelengkapan, error) {
 	var kelengkapans []Kelengkapan
 
-	err := r.db.Where("pengajuan_id = ?", pengajuanID).Preload("User").Preload("Kelengkapan").Find(&kelengkapans).Error
+	err := r.db.Where("pengajuan_id = ?", pengajuanID).Find(&kelengkapans).Error
 	if err != nil {
 		return kelengkapans, err
 	}
@@ -43,12 +46,22 @@ func (r *repository) FindByPengajuanID(pengajuanID int) ([]Kelengkapan, error) {
 func (r *repository) FindByID(PengajuanID int) (Kelengkapan, error) {
 	var kelengkapan Kelengkapan
 
-	err := r.db.Where("pengajuan_id = ?", PengajuanID).Preload("User").Preload("Kelengkapan").Find(&kelengkapan).Error
+	err := r.db.Where("pengajuan_id = ?", PengajuanID).Find(&kelengkapan).Error
 	if err != nil {
 		return kelengkapan, err
 	}
 
 	return kelengkapan, nil
+}
+
+func (r *repository) FindPengajuanByUserID(userID int) (int, error) {
+	var pengajuan Pengajuan
+	err := r.db.Where("user_id = ?", userID).Find(&pengajuan).Error
+	if err != nil {
+		return pengajuan.ID, err
+	}
+
+	return pengajuan.ID, nil
 }
 
 func (r *repository) Save(kelengkapan Kelengkapan) (Kelengkapan, error) {

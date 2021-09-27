@@ -9,7 +9,7 @@ type GetKelengkapanInput struct {
 }
 
 type CreateKelengkapanInput struct {
-	PengajuanID      int    `json:"pengajuan_id" binding:"required"`
+	PengajuanID      int    `json:"pengajuan_id"`
 	AlamatRumah      string `json:"alamat_rumah" binding:"required"`
 	LuasRumah        int    `json:"luas_rumah" binding:"required"`
 	HargaRumah       int    `json:"harga_rumah" binding:"required"`
