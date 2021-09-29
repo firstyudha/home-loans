@@ -153,3 +153,17 @@ func (h *pengajuanHandler) UploadBuktiSlipGaji(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response)
 }
+
+func (h *pengajuanHandler) CheckRecommendation(c *gin.Context) {
+	userID, _ := strconv.Atoi(c.Query("user_id"))
+
+	recommendation, err := h.pengajuanService.CheckRecommendation(userID)
+	if err != nil {
+		response := helper.APIResponse("Error to get recommendation", http.StatusBadRequest, "error", err.Error())
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Success to get recommendation", http.StatusOK, "success", recommendation)
+	c.JSON(http.StatusOK, response)
+}

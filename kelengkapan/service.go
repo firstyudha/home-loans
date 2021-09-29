@@ -3,7 +3,7 @@ package kelengkapan
 import "errors"
 
 type Service interface {
-	GetKelengkapans(userID int) ([]Kelengkapan, error)
+	GetKelengkapans(pengajuanID int) ([]Kelengkapan, error)
 	CreateKelengkapan(userID int, input CreateKelengkapanInput) (Kelengkapan, error)
 	SaveDokumenPendukung(UserID int, fileLocation string) (Kelengkapan, error)
 }

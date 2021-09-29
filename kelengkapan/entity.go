@@ -33,7 +33,3 @@ type Pengajuan struct {
 	Status             string
 	User               user.User
 }
-
-type DokumenPendukung struct {
-	DokumenPendukung string
-}

@@ -23,9 +23,9 @@ func NewKelengkapanHandler(kelengkapanService kelengkapan.Service, authService a
 }
 
 func (h *kelengkapanHandler) GetKelengkapans(c *gin.Context) {
-	userID, _ := strconv.Atoi(c.Query("user_id"))
+	pengajuanID, _ := strconv.Atoi(c.Query("pengajuan_id"))
 
-	kelengkapans, err := h.kelengkapanService.GetKelengkapans(userID)
+	kelengkapans, err := h.kelengkapanService.GetKelengkapans(pengajuanID)
 	if err != nil {
 		response := helper.APIResponse("Error to get kelengkapans", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, response)

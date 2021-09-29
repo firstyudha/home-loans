@@ -24,11 +24,3 @@ type Pengajuan struct {
 	Kelengkapan        kelengkapan.Kelengkapan
 	User               user.User
 }
-
-type BuktiKtp struct {
-	BuktiKtp string
-}
-
-type BuktiSlipGaji struct {
-	BuktiSlipGaji string
-}

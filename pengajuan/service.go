@@ -7,6 +7,7 @@ type Service interface {
 	CreatePengajuan(input CreatePengajuanInput) (Pengajuan, error)
 	SaveBuktiKTP(userID int, fileLocation string) (Pengajuan, error)
 	SaveBuktiSlipGaji(userID int, fileLocation string) (Pengajuan, error)
+	CheckRecommendation(userID int) (string, error)
 }
 
 type service struct {
@@ -95,4 +96,32 @@ func (s *service) SaveBuktiSlipGaji(userID int, fileLocation string) (Pengajuan,
 	}
 
 	return updatedPengajuan, nil
+}
+
+func (s *service) CheckRecommendation(userID int) (string, error) {
+
+	pengajuans, err := s.repository.FindByUserID(userID)
+	if err != nil {
+		return "", err
+	}
+
+	if len(pengajuans) == 0 {
+		return "", errors.New("data tidak ditemukan")
+	}
+
+	pengajuan := pengajuans[0]
+
+	if pengajuan.Kelengkapan.ID == 0 {
+		return "", errors.New("customer belum melengkapi data pengajuan")
+	}
+
+	kemampuan_cicilan_perbulan := pengajuan.PendapatanPerbulan / 3
+	kenyataan_cicilan_perbulan := (pengajuan.Kelengkapan.HargaRumah / pengajuan.Kelengkapan.JangkaPembayaran) / 12
+
+	if kemampuan_cicilan_perbulan > kenyataan_cicilan_perbulan {
+		return "Diperbolehkan", nil
+	} else {
+		return "", errors.New("tidak diperbolehkan, karena kemampuan cicilan perbulan kurang dari kenyataan cicilan perbulan")
+	}
+
 }
