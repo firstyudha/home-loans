@@ -2,6 +2,7 @@ package main
 
 import (
 	"home-loans/auth"
+	"home-loans/config"
 	"home-loans/handler"
 	"home-loans/helper"
 	"home-loans/kelengkapan"
@@ -18,7 +19,7 @@ import (
 )
 
 func main() {
-	dsn := "root:@tcp(127.0.0.1:3306)/golang-homeloans?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := config.Init().DBDSN
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
