@@ -19,13 +19,15 @@ import (
 )
 
 func main() {
-	dsn := config.Init().DBDSN
+	config := config.Init()
+	dsn := config.DBDSN
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
+	//migration
 	db.Migrator().AutoMigrate(&user.User{}, &pengajuan.Pengajuan{}, &kelengkapan.Kelengkapan{})
 
 	authService := auth.NewService()
@@ -58,24 +60,26 @@ func main() {
 	api.POST("/login", userHandler.Login)
 
 	//pengajuan endpoint
-	api.GET("/pengajuan", authMiddleware(authService, userService), pengajuanHandler.GetPengajuans)
-	api.POST("/pengajuan", authMiddleware(authService, userService), pengajuanHandler.CreatePengajuan)
-	api.PUT("/pengajuan/bukti-ktp", authMiddleware(authService, userService), pengajuanHandler.UploadBuktiKtp)
-	api.PUT("/pengajuan/bukti-slip-gaji", authMiddleware(authService, userService), pengajuanHandler.UploadBuktiSlipGaji)
+	api.POST("/pengajuan", userMiddleware(authService, userService), pengajuanHandler.CreatePengajuan)
+	api.PUT("/pengajuan/bukti-ktp", userMiddleware(authService, userService), pengajuanHandler.UploadBuktiKtp)
+	api.PUT("/pengajuan/bukti-slip-gaji", userMiddleware(authService, userService), pengajuanHandler.UploadBuktiSlipGaji)
 
 	//pengajuan endpoint staff
-	api.GET("/pengajuan/check-recommendation", authMiddleware(authService, userService), pengajuanHandler.CheckRecommendation)
+	api.GET("/pengajuan", staffMiddleware(authService, userService), pengajuanHandler.GetPengajuans)
+	api.GET("/pengajuan/check-recommendation", staffMiddleware(authService, userService), pengajuanHandler.CheckRecommendation)
 
 	//kelengkapan endpoint
-	api.GET("/kelengkapan", authMiddleware(authService, userService), kelengkapanHandler.GetKelengkapans)
-	api.POST("/kelengkapan", authMiddleware(authService, userService), kelengkapanHandler.CreateKelengkapan)
-	api.PUT("/kelengkapan/dokumen-pendukung", authMiddleware(authService, userService), kelengkapanHandler.UploadDokumenPendukung)
+	api.POST("/kelengkapan", userMiddleware(authService, userService), kelengkapanHandler.CreateKelengkapan)
+	api.PUT("/kelengkapan/dokumen-pendukung", userMiddleware(authService, userService), kelengkapanHandler.UploadDokumenPendukung)
+
+	//kelengkapan endpoint staff
+	api.GET("/kelengkapan", staffMiddleware(authService, userService), kelengkapanHandler.GetKelengkapans)
 
 	router.Run()
 
 }
 
-func authMiddleware(authService auth.Service, userService user.Service) gin.HandlerFunc {
+func userMiddleware(authService auth.Service, userService user.Service) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
@@ -127,60 +131,60 @@ func authMiddleware(authService auth.Service, userService user.Service) gin.Hand
 
 }
 
-// func adminMiddleware(authService auth.Service, userService user.Service) gin.HandlerFunc {
+func staffMiddleware(authService auth.Service, userService user.Service) gin.HandlerFunc {
 
-// 	return func(c *gin.Context) {
-// 		authHeader := c.GetHeader("Authorization")
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
 
-// 		if !strings.Contains(authHeader, "Bearer") {
-// 			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-// 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-// 			return
-// 		}
+		if !strings.Contains(authHeader, "Bearer") {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
 
-// 		//Split by space " "
-// 		tokenString := ""
-// 		arrayToken := strings.Split(authHeader, " ")
-// 		if len(arrayToken) == 2 {
-// 			tokenString = arrayToken[1]
-// 		}
+		//Split by space " "
+		tokenString := ""
+		arrayToken := strings.Split(authHeader, " ")
+		if len(arrayToken) == 2 {
+			tokenString = arrayToken[1]
+		}
 
-// 		//validate token
-// 		token, err := authService.ValidateToken(tokenString)
+		//validate token
+		token, err := authService.ValidateToken(tokenString)
 
-// 		if err != nil {
-// 			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-// 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-// 			return
-// 		}
+		if err != nil {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
 
-// 		claim, ok := token.Claims.(jwt.MapClaims)
+		claim, ok := token.Claims.(jwt.MapClaims)
 
-// 		if !ok || !token.Valid {
-// 			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-// 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-// 			return
-// 		}
+		if !ok || !token.Valid {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
 
-// 		userID := int(claim["user_id"].(float64))
+		userID := int(claim["user_id"].(float64))
 
-// 		user, err := userService.GetUserByID(userID)
+		user, err := userService.GetUserByID(userID)
 
-// 		if err != nil {
-// 			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-// 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-// 			return
-// 		}
+		if err != nil {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
 
-// 		if user.LoginAs != 2 { //must be officer/staff
-// 			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-// 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-// 			return
-// 		}
+		if user.LoginAs != 2 { //must be officer/staff
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
 
-// 		//context currentUser
-// 		c.Set("currentUser", user)
+		//context currentUser
+		c.Set("currentUser", user)
 
-// 	}
+	}
 
-// }
+}

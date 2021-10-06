@@ -21,6 +21,8 @@ func NewService() *jwtService {
 
 var JWT_SECRET_KEY = []byte(os.Getenv("JWT_SECRET_KEY"))
 
+//var JWT_SECRET_KEY = []byte("test")
+
 func (s *jwtService) GenerateToken(userID int) (string, error) {
 	claim := jwt.MapClaims{}
 	claim["user_id"] = userID
