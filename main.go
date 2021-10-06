@@ -50,13 +50,13 @@ func main() {
 	router := gin.Default()
 	router.Use(cors.Default())
 
-	//publish file
-	router.Static("bukti_ktp_files/", "./bukti_ktp_files")
-	router.Static("bukti_slip_gaji_files/", "./bukti_slip_gaji_files")
-	router.Static("dokumen_pendukung_files/", "./dokumen_pendukung_files")
-
 	//grouping
 	api := router.Group("/api/v1")
+
+	//publish file
+	api.Static("bukti_ktp_files/", "./bukti_ktp_files")
+	api.Static("bukti_slip_gaji_files/", "./bukti_slip_gaji_files")
+	api.Static("dokumen_pendukung_files/", "./dokumen_pendukung_files")
 
 	api.POST("/register", userHandler.RegisterUser)
 	api.POST("/login", userHandler.Login)
