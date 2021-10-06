@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -47,6 +48,7 @@ func main() {
 	kelengkapanHandler := handler.NewKelengkapanHandler(kelengkapanService, authService)
 
 	router := gin.Default()
+	router.Use(cors.Default())
 
 	//publish file
 	router.Static("bukti_ktp_files/", "./bukti_ktp_files")
