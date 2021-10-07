@@ -7,6 +7,7 @@ type Service interface {
 	CreatePengajuan(input CreatePengajuanInput) (Pengajuan, error)
 	SaveBuktiKTP(userID int, fileLocation string) (Pengajuan, error)
 	SaveBuktiSlipGaji(userID int, fileLocation string) (Pengajuan, error)
+	SavePengajuanStatus(userID GetPengajuanInput, input UpdatePengajuanStatusInput) (Pengajuan, error)
 	CheckRecommendation(userID int) (string, error)
 	DeletePengajuan(userID int) error
 }
@@ -90,6 +91,23 @@ func (s *service) SaveBuktiSlipGaji(userID int, fileLocation string) (Pengajuan,
 	}
 
 	pengajuan.BuktiSlipGaji = fileLocation
+
+	updatedPengajuan, err := s.repository.Update(pengajuan)
+	if err != nil {
+		return updatedPengajuan, err
+	}
+
+	return updatedPengajuan, nil
+}
+
+func (s *service) SavePengajuanStatus(userID GetPengajuanInput, input UpdatePengajuanStatusInput) (Pengajuan, error) {
+
+	pengajuan, err := s.repository.FindByID(userID.UserID)
+	if err != nil {
+		return Pengajuan{}, err
+	}
+
+	pengajuan.Status = input.Status
 
 	updatedPengajuan, err := s.repository.Update(pengajuan)
 	if err != nil {

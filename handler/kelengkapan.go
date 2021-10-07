@@ -35,6 +35,20 @@ func (h *kelengkapanHandler) GetKelengkapans(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+func (h *kelengkapanHandler) GetKelengkapanUser(c *gin.Context) {
+	currentUser := c.MustGet("currentUser").(user.User)
+	userID := currentUser.ID
+	kelengkapans, err := h.kelengkapanService.GetKelengkapans(userID)
+	if err != nil {
+		response := helper.APIResponse("Error to get kelengkapans", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("List of kelengkapans", http.StatusOK, "success", kelengkapan.FormatKelengkapans(kelengkapans))
+	c.JSON(http.StatusOK, response)
+}
+
 func (h *kelengkapanHandler) CreateKelengkapan(c *gin.Context) {
 	var input kelengkapan.CreateKelengkapanInput
 
@@ -127,4 +141,38 @@ func (h *kelengkapanHandler) DeleteKelengkapan(c *gin.Context) {
 	response := helper.APIResponse("Kelengkapan deleted", http.StatusOK, "success", data)
 
 	c.JSON(http.StatusOK, response)
+}
+
+func (h *kelengkapanHandler) UpdateKelengkapanStatus(c *gin.Context) {
+	var userID kelengkapan.GetKelengkapanInput
+
+	err := c.ShouldBindUri(&userID)
+	if err != nil {
+		response := helper.APIResponse("Failed to update kelengkapan status", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	var inputData kelengkapan.UpdateKelengkapanStatusInput
+
+	err = c.ShouldBindJSON(&inputData)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Failed to update kelengkapan status", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	updatedKelengkapanStatus, err := h.kelengkapanService.SaveKelengkapanStatus(userID, inputData)
+	if err != nil {
+		response := helper.APIResponse("Failed to update kelengkapan", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Success to update kelengkapan", http.StatusOK, "success", kelengkapan.FormatKelengkapan(updatedKelengkapanStatus))
+	c.JSON(http.StatusOK, response)
+
 }

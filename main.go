@@ -20,6 +20,7 @@ import (
 )
 
 func main() {
+
 	config := config.Init()
 	dsn := config.DBDSN
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
@@ -61,7 +62,8 @@ func main() {
 	api.POST("/register", userHandler.RegisterUser)
 	api.POST("/login", userHandler.Login)
 
-	//pengajuan endpoint
+	//pengajuan endpoint user
+	api.GET("/pengajuan-user", userMiddleware(authService, userService), pengajuanHandler.GetPengajuanUser)
 	api.POST("/pengajuan", userMiddleware(authService, userService), pengajuanHandler.CreatePengajuan)
 	api.PUT("/pengajuan/bukti-ktp", userMiddleware(authService, userService), pengajuanHandler.UploadBuktiKtp)
 	api.PUT("/pengajuan/bukti-slip-gaji", userMiddleware(authService, userService), pengajuanHandler.UploadBuktiSlipGaji)
@@ -70,14 +72,17 @@ func main() {
 	//pengajuan endpoint staff
 	api.GET("/pengajuan", staffMiddleware(authService, userService), pengajuanHandler.GetPengajuans)
 	api.GET("/pengajuan/check-recommendation", staffMiddleware(authService, userService), pengajuanHandler.CheckRecommendation)
+	api.PUT("/pengajuan/status/:user_id", staffMiddleware(authService, userService), pengajuanHandler.UpdatePengajuanStatus)
 
-	//kelengkapan endpoint
+	//kelengkapan endpoint user
+	api.GET("/kelengkapan-user", userMiddleware(authService, userService), kelengkapanHandler.GetKelengkapanUser)
 	api.POST("/kelengkapan", userMiddleware(authService, userService), kelengkapanHandler.CreateKelengkapan)
 	api.PUT("/kelengkapan/dokumen-pendukung", userMiddleware(authService, userService), kelengkapanHandler.UploadDokumenPendukung)
 	api.DELETE("/kelengkapan", userMiddleware(authService, userService), kelengkapanHandler.DeleteKelengkapan)
 
 	//kelengkapan endpoint staff
 	api.GET("/kelengkapan", staffMiddleware(authService, userService), kelengkapanHandler.GetKelengkapans)
+	api.PUT("/kelengkapan/status/:user_id", staffMiddleware(authService, userService), kelengkapanHandler.UpdateKelengkapanStatus)
 
 	router.Run()
 

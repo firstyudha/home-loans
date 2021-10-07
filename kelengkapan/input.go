@@ -5,7 +5,7 @@ import (
 )
 
 type GetKelengkapanInput struct {
-	PengajuanID int `uri:"pengajuan_id" binding:"required"`
+	UserID int `uri:"user_id" binding:"required"`
 }
 
 type CreateKelengkapanInput struct {
@@ -16,4 +16,8 @@ type CreateKelengkapanInput struct {
 	JangkaPembayaran int    `json:"jangka_pembayaran" binding:"required"`
 	Status           string `json:"status"`
 	User             user.User
+}
+
+type UpdateKelengkapanStatusInput struct {
+	Status string `json:"status" binding:"required"`
 }

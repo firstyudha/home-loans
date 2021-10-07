@@ -6,6 +6,7 @@ type Service interface {
 	GetKelengkapans(userID int) ([]Kelengkapan, error)
 	CreateKelengkapan(userID int, input CreateKelengkapanInput) (Kelengkapan, error)
 	SaveDokumenPendukung(UserID int, fileLocation string) (Kelengkapan, error)
+	SaveKelengkapanStatus(userID GetKelengkapanInput, input UpdateKelengkapanStatusInput) (Kelengkapan, error)
 	DeleteKelengkapan(userID int) error
 }
 
@@ -102,6 +103,33 @@ func (s *service) SaveDokumenPendukung(userID int, fileLocation string) (Kelengk
 	}
 
 	return updatedKelengkapan, nil
+}
+
+func (s *service) SaveKelengkapanStatus(userID GetKelengkapanInput, input UpdateKelengkapanStatusInput) (Kelengkapan, error) {
+
+	pengajuan_id, err := s.repository.FindPengajuanIDByUserID(userID.UserID)
+	if err != nil {
+		return Kelengkapan{}, err
+	}
+
+	//check if pengajuan kosong
+	if pengajuan_id == 0 {
+		return Kelengkapan{}, errors.New("data kelengkapan tidak ditemukan")
+	}
+
+	kelengkapan, err := s.repository.FindByID(pengajuan_id)
+	if err != nil {
+		return Kelengkapan{}, err
+	}
+
+	kelengkapan.Status = input.Status
+
+	updatedkelengkapan, err := s.repository.Update(kelengkapan)
+	if err != nil {
+		return updatedkelengkapan, err
+	}
+
+	return updatedkelengkapan, nil
 }
 
 func (s *service) DeleteKelengkapan(userID int) error {

@@ -36,6 +36,22 @@ func (h *pengajuanHandler) GetPengajuans(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+func (h *pengajuanHandler) GetPengajuanUser(c *gin.Context) {
+
+	currentUser := c.MustGet("currentUser").(user.User)
+	userID := currentUser.ID
+
+	pengajuans, err := h.pengajuanService.GetPengajuans(userID)
+	if err != nil {
+		response := helper.APIResponse("Error to get pengajuans", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("List of pengajuans", http.StatusOK, "success", pengajuan.FormatPengajuans(pengajuans))
+	c.JSON(http.StatusOK, response)
+}
+
 func (h *pengajuanHandler) CreatePengajuan(c *gin.Context) {
 	var input pengajuan.CreatePengajuanInput
 
@@ -186,4 +202,38 @@ func (h *pengajuanHandler) DeletePengajuan(c *gin.Context) {
 	response := helper.APIResponse("Pengajuan deleted", http.StatusOK, "success", data)
 
 	c.JSON(http.StatusOK, response)
+}
+
+func (h *pengajuanHandler) UpdatePengajuanStatus(c *gin.Context) {
+	var userID pengajuan.GetPengajuanInput
+
+	err := c.ShouldBindUri(&userID)
+	if err != nil {
+		response := helper.APIResponse("Failed to update pengajuan status", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	var inputData pengajuan.UpdatePengajuanStatusInput
+
+	err = c.ShouldBindJSON(&inputData)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Failed to update pengajuan status", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	updatedPengajuanStatus, err := h.pengajuanService.SavePengajuanStatus(userID, inputData)
+	if err != nil {
+		response := helper.APIResponse("Failed to update kelengkapan", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Success to update kelengkapan", http.StatusOK, "success", pengajuan.FormatPengajuan(updatedPengajuanStatus))
+	c.JSON(http.StatusOK, response)
+
 }
