@@ -4,15 +4,12 @@ import (
 	"home-loans/auth"
 	"home-loans/config"
 	"home-loans/handler"
-	"home-loans/helper"
 	"home-loans/kelengkapan"
+	"home-loans/middleware"
 	"home-loans/pengajuan"
 	"home-loans/user"
 	"log"
-	"net/http"
-	"strings"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
@@ -47,6 +44,10 @@ func main() {
 	kelengkapanRepository := kelengkapan.NewRepository(db)
 	kelengkapanService := kelengkapan.NewService(kelengkapanRepository)
 	kelengkapanHandler := handler.NewKelengkapanHandler(kelengkapanService, authService)
+
+	//MIDDLEWARE
+	userMiddleware := middleware.UserMiddleware
+	staffMiddleware := middleware.StaffMiddleware
 
 	router := gin.Default()
 	router.Use(cors.Default())
@@ -85,115 +86,5 @@ func main() {
 	api.PUT("/kelengkapan/status/:user_id", staffMiddleware(authService, userService), kelengkapanHandler.UpdateKelengkapanStatus)
 
 	router.Run()
-
-}
-
-func userMiddleware(authService auth.Service, userService user.Service) gin.HandlerFunc {
-
-	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-
-		if !strings.Contains(authHeader, "Bearer") {
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-
-		//Split by space " "
-		tokenString := ""
-		arrayToken := strings.Split(authHeader, " ")
-		if len(arrayToken) == 2 {
-			tokenString = arrayToken[1]
-		}
-
-		//validate token
-		token, err := authService.ValidateToken(tokenString)
-
-		if err != nil {
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-
-		claim, ok := token.Claims.(jwt.MapClaims)
-
-		if !ok || !token.Valid {
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-
-		userID := int(claim["user_id"].(float64))
-
-		user, err := userService.GetUserByID(userID)
-
-		if err != nil {
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-
-		//context currentUser
-		c.Set("currentUser", user)
-
-	}
-
-}
-
-func staffMiddleware(authService auth.Service, userService user.Service) gin.HandlerFunc {
-
-	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-
-		if !strings.Contains(authHeader, "Bearer") {
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-
-		//Split by space " "
-		tokenString := ""
-		arrayToken := strings.Split(authHeader, " ")
-		if len(arrayToken) == 2 {
-			tokenString = arrayToken[1]
-		}
-
-		//validate token
-		token, err := authService.ValidateToken(tokenString)
-
-		if err != nil {
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-
-		claim, ok := token.Claims.(jwt.MapClaims)
-
-		if !ok || !token.Valid {
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-
-		userID := int(claim["user_id"].(float64))
-
-		user, err := userService.GetUserByID(userID)
-
-		if err != nil {
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-
-		if user.LoginAs != 2 { //must be officer/staff
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-
-		//context currentUser
-		c.Set("currentUser", user)
-
-	}
 
 }
