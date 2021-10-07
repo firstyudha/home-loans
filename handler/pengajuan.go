@@ -167,3 +167,23 @@ func (h *pengajuanHandler) CheckRecommendation(c *gin.Context) {
 	response := helper.APIResponse("Success to get recommendation", http.StatusOK, "success", recommendation)
 	c.JSON(http.StatusOK, response)
 }
+
+func (h *pengajuanHandler) DeletePengajuan(c *gin.Context) {
+
+	currentUser := c.MustGet("currentUser").(user.User)
+	userID := currentUser.ID
+
+	err := h.pengajuanService.DeletePengajuan(userID)
+	if err != nil {
+		data := gin.H{"is_deleted": false}
+		response := helper.APIResponse("Failed to delete pengajuan", http.StatusBadRequest, "error", data)
+
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	data := gin.H{"is_deleted": true}
+	response := helper.APIResponse("Pengajuan deleted", http.StatusOK, "success", data)
+
+	c.JSON(http.StatusOK, response)
+}

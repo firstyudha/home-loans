@@ -23,9 +23,8 @@ func NewKelengkapanHandler(kelengkapanService kelengkapan.Service, authService a
 }
 
 func (h *kelengkapanHandler) GetKelengkapans(c *gin.Context) {
-	pengajuanID, _ := strconv.Atoi(c.Query("pengajuan_id"))
-
-	kelengkapans, err := h.kelengkapanService.GetKelengkapans(pengajuanID)
+	userID, _ := strconv.Atoi(c.Query("user_id"))
+	kelengkapans, err := h.kelengkapanService.GetKelengkapans(userID)
 	if err != nil {
 		response := helper.APIResponse("Error to get kelengkapans", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, response)
@@ -106,6 +105,26 @@ func (h *kelengkapanHandler) UploadDokumenPendukung(c *gin.Context) {
 
 	data := gin.H{"is_uploaded": true}
 	response := helper.APIResponse("Dokumen pendukung successfuly uploaded", http.StatusOK, "success", data)
+
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *kelengkapanHandler) DeleteKelengkapan(c *gin.Context) {
+
+	currentUser := c.MustGet("currentUser").(user.User)
+	userID := currentUser.ID
+
+	err := h.kelengkapanService.DeleteKelengkapan(userID)
+	if err != nil {
+		data := gin.H{"is_deleted": false}
+		response := helper.APIResponse("Failed to delete kelengkapan", http.StatusBadRequest, "error", data)
+
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	data := gin.H{"is_deleted": true}
+	response := helper.APIResponse("Kelengkapan deleted", http.StatusOK, "success", data)
 
 	c.JSON(http.StatusOK, response)
 }

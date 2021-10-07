@@ -65,6 +65,7 @@ func main() {
 	api.POST("/pengajuan", userMiddleware(authService, userService), pengajuanHandler.CreatePengajuan)
 	api.PUT("/pengajuan/bukti-ktp", userMiddleware(authService, userService), pengajuanHandler.UploadBuktiKtp)
 	api.PUT("/pengajuan/bukti-slip-gaji", userMiddleware(authService, userService), pengajuanHandler.UploadBuktiSlipGaji)
+	api.DELETE("/pengajuan", userMiddleware(authService, userService), pengajuanHandler.DeletePengajuan)
 
 	//pengajuan endpoint staff
 	api.GET("/pengajuan", staffMiddleware(authService, userService), pengajuanHandler.GetPengajuans)
@@ -73,6 +74,7 @@ func main() {
 	//kelengkapan endpoint
 	api.POST("/kelengkapan", userMiddleware(authService, userService), kelengkapanHandler.CreateKelengkapan)
 	api.PUT("/kelengkapan/dokumen-pendukung", userMiddleware(authService, userService), kelengkapanHandler.UploadDokumenPendukung)
+	api.DELETE("/kelengkapan", userMiddleware(authService, userService), kelengkapanHandler.DeleteKelengkapan)
 
 	//kelengkapan endpoint staff
 	api.GET("/kelengkapan", staffMiddleware(authService, userService), kelengkapanHandler.GetKelengkapans)

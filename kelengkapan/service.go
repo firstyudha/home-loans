@@ -3,9 +3,10 @@ package kelengkapan
 import "errors"
 
 type Service interface {
-	GetKelengkapans(pengajuanID int) ([]Kelengkapan, error)
+	GetKelengkapans(userID int) ([]Kelengkapan, error)
 	CreateKelengkapan(userID int, input CreateKelengkapanInput) (Kelengkapan, error)
 	SaveDokumenPendukung(UserID int, fileLocation string) (Kelengkapan, error)
+	DeleteKelengkapan(userID int) error
 }
 
 type service struct {
@@ -16,16 +17,29 @@ func NewService(repository Repository) *service {
 	return &service{repository}
 }
 
-func (s *service) GetKelengkapans(PengajuanID int) ([]Kelengkapan, error) {
-	if PengajuanID != 0 {
-		kelengkapans, err := s.repository.FindByPengajuanID(PengajuanID)
+func (s *service) GetKelengkapans(userID int) ([]Kelengkapan, error) {
+
+	//user add params
+	if userID != 0 {
+
+		//find pengajuan id by user id
+		pengajuan_id, err := s.repository.FindPengajuanIDByUserID(userID)
+
 		if err != nil {
-			return kelengkapans, err
+			return []Kelengkapan{}, err
 		}
 
-		return kelengkapans, nil
+		if pengajuan_id != 0 {
+			kelengkapans, err := s.repository.FindByPengajuanID(pengajuan_id)
+			if err != nil {
+				return kelengkapans, err
+			}
+
+			return kelengkapans, nil
+		}
 	}
 
+	//user doesnt user params
 	kelengkapans, err := s.repository.FindAll()
 	if err != nil {
 		return kelengkapans, err
@@ -36,7 +50,7 @@ func (s *service) GetKelengkapans(PengajuanID int) ([]Kelengkapan, error) {
 
 func (s *service) CreateKelengkapan(userID int, input CreateKelengkapanInput) (Kelengkapan, error) {
 	kelengkapan := Kelengkapan{}
-	pengajuan_id, err := s.repository.FindPengajuanByUserID(userID)
+	pengajuan_id, err := s.repository.FindPengajuanIDByUserID(userID)
 
 	if err != nil {
 		return kelengkapan, err
@@ -69,12 +83,12 @@ func (s *service) CreateKelengkapan(userID int, input CreateKelengkapanInput) (K
 
 func (s *service) SaveDokumenPendukung(userID int, fileLocation string) (Kelengkapan, error) {
 	//find pengajuan id by user id
-	pengajuan_id, err := s.repository.FindPengajuanByUserID(userID)
+	pengajuan_id, err := s.repository.FindPengajuanIDByUserID(userID)
 	if err != nil {
 		return Kelengkapan{}, err
 	}
 
-	//find kelengkapan by pengajua id
+	//find kelengkapan by pengajuan id
 	kelengkapan, err := s.repository.FindByID(pengajuan_id)
 	if err != nil {
 		return Kelengkapan{}, err
@@ -88,4 +102,25 @@ func (s *service) SaveDokumenPendukung(userID int, fileLocation string) (Kelengk
 	}
 
 	return updatedKelengkapan, nil
+}
+
+func (s *service) DeleteKelengkapan(userID int) error {
+	//find pengajuan id by user id
+	pengajuan_id, err := s.repository.FindPengajuanIDByUserID(userID)
+	if err != nil {
+		return err
+	}
+
+	//check if pengajuan kosong
+	if pengajuan_id == 0 {
+		return errors.New("data kelengkapan tidak ditemukan")
+	}
+
+	//delete kelengkapan by pengajuan id
+	err = s.repository.Delete(pengajuan_id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -8,6 +8,7 @@ type Service interface {
 	SaveBuktiKTP(userID int, fileLocation string) (Pengajuan, error)
 	SaveBuktiSlipGaji(userID int, fileLocation string) (Pengajuan, error)
 	CheckRecommendation(userID int) (string, error)
+	DeletePengajuan(userID int) error
 }
 
 type service struct {
@@ -124,4 +125,25 @@ func (s *service) CheckRecommendation(userID int) (string, error) {
 		return "", errors.New("tidak diperbolehkan, karena kemampuan cicilan perbulan kurang dari kenyataan cicilan perbulan")
 	}
 
+}
+
+func (s *service) DeletePengajuan(userID int) error {
+	//find pengajuan id by user id
+	pengajuan, err := s.repository.FindByID(userID)
+	if err != nil {
+		return err
+	}
+
+	//check if pengajuan kosong
+	if pengajuan.ID == 0 {
+		return errors.New("data pengajuan tidak ditemukan")
+	}
+
+	//find kelengkapan by pengajuan id
+	err = s.repository.Delete(pengajuan.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

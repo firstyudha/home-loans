@@ -8,6 +8,7 @@ type Repository interface {
 	FindByID(userID int) (Pengajuan, error)
 	Save(pengajuan Pengajuan) (Pengajuan, error)
 	Update(pengajuan Pengajuan) (Pengajuan, error)
+	Delete(userID int) error
 }
 
 type repository struct {
@@ -68,4 +69,17 @@ func (r *repository) Update(pengajuan Pengajuan) (Pengajuan, error) {
 	}
 
 	return pengajuan, nil
+}
+
+func (r *repository) Delete(userID int) error {
+
+	var pengajuan Pengajuan
+
+	err := r.db.Where("user_id = ?", userID).Delete(&pengajuan).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }

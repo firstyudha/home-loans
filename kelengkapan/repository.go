@@ -8,9 +8,10 @@ type Repository interface {
 	FindAll() ([]Kelengkapan, error)
 	FindByPengajuanID(pengajuanID int) ([]Kelengkapan, error)
 	FindByID(pengajuanID int) (Kelengkapan, error)
-	FindPengajuanByUserID(userID int) (int, error)
+	FindPengajuanIDByUserID(userID int) (int, error)
 	Save(kelengkapan Kelengkapan) (Kelengkapan, error)
 	Update(kelengkapan Kelengkapan) (Kelengkapan, error)
+	Delete(pengajuanID int) error
 }
 
 type repository struct {
@@ -54,7 +55,7 @@ func (r *repository) FindByID(PengajuanID int) (Kelengkapan, error) {
 	return kelengkapan, nil
 }
 
-func (r *repository) FindPengajuanByUserID(userID int) (int, error) {
+func (r *repository) FindPengajuanIDByUserID(userID int) (int, error) {
 	var pengajuan Pengajuan
 	err := r.db.Where("user_id = ?", userID).Find(&pengajuan).Error
 	if err != nil {
@@ -81,4 +82,16 @@ func (r *repository) Update(kelengkapan Kelengkapan) (Kelengkapan, error) {
 	}
 
 	return kelengkapan, nil
+}
+
+func (r *repository) Delete(pengajuanID int) error {
+
+	var kelengkapan Kelengkapan
+
+	err := r.db.Where("pengajuan_id = ?", pengajuanID).Delete(&kelengkapan).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
