@@ -1,3 +1,6 @@
 .env
 .vscode
+bukti_ktp_files/*
+bukti_slip_gaji_files/*
+dokumen_pendukung_files/*
 vendor/

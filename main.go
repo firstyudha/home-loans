@@ -29,6 +29,10 @@ func main() {
 	//migration
 	db.Migrator().AutoMigrate(&user.User{}, &pengajuan.Pengajuan{}, &kelengkapan.Kelengkapan{})
 
+	//MIDDLEWARE
+	userMiddleware := middleware.UserMiddleware
+	staffMiddleware := middleware.StaffMiddleware
+
 	authService := auth.NewService()
 
 	userRepository := user.NewRepository(db)
@@ -44,10 +48,6 @@ func main() {
 	kelengkapanRepository := kelengkapan.NewRepository(db)
 	kelengkapanService := kelengkapan.NewService(kelengkapanRepository)
 	kelengkapanHandler := handler.NewKelengkapanHandler(kelengkapanService, authService)
-
-	//MIDDLEWARE
-	userMiddleware := middleware.UserMiddleware
-	staffMiddleware := middleware.StaffMiddleware
 
 	router := gin.Default()
 	router.Use(cors.Default())

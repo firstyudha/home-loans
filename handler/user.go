@@ -97,3 +97,27 @@ func (h *userHandler) Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response)
 }
+
+func (h *userHandler) FetchUser(c *gin.Context) {
+
+	currentUser := c.MustGet("currentUser").(user.User)
+
+	formatter := user.FormatUser(currentUser, "")
+
+	response := helper.APIResponse("Successfuly fetch user data", http.StatusOK, "success", formatter)
+
+	c.JSON(http.StatusOK, response)
+
+}
+
+func (h *userHandler) FetchStaff(c *gin.Context) {
+
+	currentUser := c.MustGet("currentUser").(user.User)
+
+	formatter := user.FormatUser(currentUser, "")
+
+	response := helper.APIResponse("Successfuly fetch user data", http.StatusOK, "success", formatter)
+
+	c.JSON(http.StatusOK, response)
+
+}
