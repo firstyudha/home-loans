@@ -14,13 +14,16 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func main() {
 
 	config := config.Init()
 	dsn := config.DBDSN
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
 
 	if err != nil {
 		log.Fatal(err.Error())
@@ -29,9 +32,12 @@ func main() {
 	//migration
 	db.Migrator().AutoMigrate(&user.User{}, &pengajuan.Pengajuan{}, &kelengkapan.Kelengkapan{})
 
+	//staff seeder
+	user.StaffSeeder(db)
+
 	//MIDDLEWARE
-	userMiddleware := middleware.UserMiddleware
-	staffMiddleware := middleware.StaffMiddleware
+	userMiddleware := middleware.UserMiddleware   // as long as have a jwt
+	staffMiddleware := middleware.StaffMiddleware // must be staff
 
 	authService := auth.NewService()
 
@@ -64,22 +70,20 @@ func main() {
 	api.POST("/login", userHandler.Login)
 
 	//pengajuan endpoint user
-	api.GET("/pengajuan-user", userMiddleware(authService, userService), pengajuanHandler.GetPengajuanUser)
+	api.GET("/pengajuan", userMiddleware(authService, userService), pengajuanHandler.GetPengajuans)
 	api.POST("/pengajuan", userMiddleware(authService, userService), pengajuanHandler.CreatePengajuan)
 	api.PUT("/pengajuan/bukti-ktp", userMiddleware(authService, userService), pengajuanHandler.UploadBuktiKtp)
 	api.PUT("/pengajuan/bukti-slip-gaji", userMiddleware(authService, userService), pengajuanHandler.UploadBuktiSlipGaji)
 	api.DELETE("/pengajuan", userMiddleware(authService, userService), pengajuanHandler.DeletePengajuan)
 
 	//pengajuan endpoint staff
-	api.GET("/pengajuan", staffMiddleware(authService, userService), pengajuanHandler.GetPengajuans)
+	api.GET("/pengajuan/detail", staffMiddleware(authService, userService), pengajuanHandler.GetPengajuanDetail)
 	api.GET("/pengajuan/check-recommendation", staffMiddleware(authService, userService), pengajuanHandler.CheckRecommendation)
 	api.PUT("/pengajuan/status/:user_id", staffMiddleware(authService, userService), pengajuanHandler.UpdatePengajuanStatus)
 
 	//kelengkapan endpoint user
-	api.GET("/kelengkapan-user", userMiddleware(authService, userService), kelengkapanHandler.GetKelengkapanUser)
 	api.POST("/kelengkapan", userMiddleware(authService, userService), kelengkapanHandler.CreateKelengkapan)
 	api.PUT("/kelengkapan/dokumen-pendukung", userMiddleware(authService, userService), kelengkapanHandler.UploadDokumenPendukung)
-	api.DELETE("/kelengkapan", userMiddleware(authService, userService), kelengkapanHandler.DeleteKelengkapan)
 
 	//kelengkapan endpoint staff
 	api.GET("/kelengkapan", staffMiddleware(authService, userService), kelengkapanHandler.GetKelengkapans)

@@ -23,32 +23,55 @@ func NewPengajuanHandler(pengajuanService pengajuan.Service, authService auth.Se
 }
 
 func (h *pengajuanHandler) GetPengajuans(c *gin.Context) {
-	userID, _ := strconv.Atoi(c.Query("user_id"))
-
-	pengajuans, err := h.pengajuanService.GetPengajuans(userID)
-	if err != nil {
-		response := helper.APIResponse("Error to get pengajuans", http.StatusBadRequest, "error", nil)
-		c.JSON(http.StatusBadRequest, response)
-		return
-	}
-
-	response := helper.APIResponse("List of pengajuans", http.StatusOK, "success", pengajuan.FormatPengajuans(pengajuans))
-	c.JSON(http.StatusOK, response)
-}
-
-func (h *pengajuanHandler) GetPengajuanUser(c *gin.Context) {
 
 	currentUser := c.MustGet("currentUser").(user.User)
-	userID := currentUser.ID
 
-	pengajuans, err := h.pengajuanService.GetPengajuans(userID)
-	if err != nil {
-		response := helper.APIResponse("Error to get pengajuans", http.StatusBadRequest, "error", nil)
+	//user not login
+	if currentUser.ID == 0 {
+		response := helper.APIResponse("Unauthorized.", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
-	response := helper.APIResponse("List of pengajuans", http.StatusOK, "success", pengajuan.FormatPengajuans(pengajuans))
+	//login as customer
+	if currentUser.LoginAs == 1 {
+		pengajuans, err := h.pengajuanService.GetPengajuan(currentUser.ID)
+		if err != nil {
+			response := helper.APIResponse("Error to get pengajuans", http.StatusBadRequest, "error", nil)
+			c.JSON(http.StatusBadRequest, response)
+			return
+		}
+
+		response := helper.APIResponse("List of pengajuans", http.StatusOK, "success", pengajuan.FormatPengajuans(pengajuans))
+		c.JSON(http.StatusOK, response)
+	}
+
+	//login as staff
+	if currentUser.LoginAs == 2 {
+		pengajuans, err := h.pengajuanService.GetPengajuans()
+		if err != nil {
+			response := helper.APIResponse("Error to get pengajuans", http.StatusBadRequest, "error", nil)
+			c.JSON(http.StatusBadRequest, response)
+			return
+		}
+
+		response := helper.APIResponse("List of pengajuans", http.StatusOK, "success", pengajuan.FormatPengajuans(pengajuans))
+		c.JSON(http.StatusOK, response)
+	}
+
+}
+
+func (h *pengajuanHandler) GetPengajuanDetail(c *gin.Context) {
+	userID, _ := strconv.Atoi(c.Query("user_id"))
+
+	pengajuans, err := h.pengajuanService.GetPengajuan(userID)
+	if err != nil {
+		response := helper.APIResponse("Error to get pengajuan", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("List of pengajuan", http.StatusOK, "success", pengajuan.FormatPengajuans(pengajuans))
 	c.JSON(http.StatusOK, response)
 }
 

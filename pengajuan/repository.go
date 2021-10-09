@@ -1,6 +1,10 @@
 package pengajuan
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Repository interface {
 	FindAll() ([]Pengajuan, error)
@@ -8,7 +12,7 @@ type Repository interface {
 	FindByID(userID int) (Pengajuan, error)
 	Save(pengajuan Pengajuan) (Pengajuan, error)
 	Update(pengajuan Pengajuan) (Pengajuan, error)
-	Delete(userID int) error
+	Delete(userID int, pengajuanID int) error
 }
 
 type repository struct {
@@ -71,14 +75,30 @@ func (r *repository) Update(pengajuan Pengajuan) (Pengajuan, error) {
 	return pengajuan, nil
 }
 
-func (r *repository) Delete(userID int) error {
+func (r *repository) Delete(userID int, pengajuanID int) error {
 
-	var pengajuan Pengajuan
+	r.db.Transaction(func(tx *gorm.DB) error {
 
-	err := r.db.Where("user_id = ?", userID).Delete(&pengajuan).Error
-	if err != nil {
-		return err
-	}
+		kelengkapan := tx.Exec("UPDATE kelengkapans SET deleted_at = ? WHERE pengajuan_id = ?", time.Now(), pengajuanID)
+
+		//check error update kelengkapan, then rollback
+		if kelengkapan.Error != nil {
+			tx.Rollback()
+			panic(kelengkapan.Error)
+		}
+
+		pengajuan := tx.Exec("UPDATE pengajuans SET deleted_at = ? WHERE user_id = ?", time.Now(), userID)
+
+		//check error update pengajuan, then rollback
+		if pengajuan.Error != nil {
+			tx.Rollback()
+			panic(pengajuan.Error)
+		}
+
+		//if no error, then commit
+		tx.Commit()
+		return nil
+	})
 
 	return nil
 

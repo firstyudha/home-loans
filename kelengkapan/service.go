@@ -7,7 +7,6 @@ type Service interface {
 	CreateKelengkapan(userID int, input CreateKelengkapanInput) (Kelengkapan, error)
 	SaveDokumenPendukung(UserID int, fileLocation string) (Kelengkapan, error)
 	SaveKelengkapanStatus(userID GetKelengkapanInput, input UpdateKelengkapanStatusInput) (Kelengkapan, error)
-	DeleteKelengkapan(userID int) error
 }
 
 type service struct {
@@ -130,25 +129,4 @@ func (s *service) SaveKelengkapanStatus(userID GetKelengkapanInput, input Update
 	}
 
 	return updatedkelengkapan, nil
-}
-
-func (s *service) DeleteKelengkapan(userID int) error {
-	//find pengajuan id by user id
-	pengajuan_id, err := s.repository.FindPengajuanIDByUserID(userID)
-	if err != nil {
-		return err
-	}
-
-	//check if pengajuan kosong
-	if pengajuan_id == 0 {
-		return errors.New("data kelengkapan tidak ditemukan")
-	}
-
-	//delete kelengkapan by pengajuan id
-	err = s.repository.Delete(pengajuan_id)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

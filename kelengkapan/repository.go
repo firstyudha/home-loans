@@ -11,7 +11,6 @@ type Repository interface {
 	FindPengajuanIDByUserID(userID int) (int, error)
 	Save(kelengkapan Kelengkapan) (Kelengkapan, error)
 	Update(kelengkapan Kelengkapan) (Kelengkapan, error)
-	Delete(pengajuanID int) error
 }
 
 type repository struct {
@@ -82,16 +81,4 @@ func (r *repository) Update(kelengkapan Kelengkapan) (Kelengkapan, error) {
 	}
 
 	return kelengkapan, nil
-}
-
-func (r *repository) Delete(pengajuanID int) error {
-
-	var kelengkapan Kelengkapan
-
-	err := r.db.Where("pengajuan_id = ?", pengajuanID).Delete(&kelengkapan).Error
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

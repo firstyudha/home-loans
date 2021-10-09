@@ -23,7 +23,7 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&input)
 
-	//validasi inputan jika ada error reqiured,email,etc
+	//validasi inputan jika ada error reqiured,password,etc
 	if err != nil {
 
 		errors := helper.FormatValidationError(err)
@@ -37,7 +37,8 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 
 	newUser, err := h.userService.RegisterUser(input)
 	if err != nil {
-		response := helper.APIResponse("Register account failed", http.StatusBadRequest, "error", nil)
+		errorMessage := gin.H{"errors": err.Error()}
+		response := helper.APIResponse("Register account failed", http.StatusBadRequest, "error", errorMessage)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
@@ -96,28 +97,4 @@ func (h *userHandler) Login(c *gin.Context) {
 	response := helper.APIResponse("Successfully loggedin", http.StatusOK, "success", formatter)
 
 	c.JSON(http.StatusOK, response)
-}
-
-func (h *userHandler) FetchUser(c *gin.Context) {
-
-	currentUser := c.MustGet("currentUser").(user.User)
-
-	formatter := user.FormatUser(currentUser, "")
-
-	response := helper.APIResponse("Successfuly fetch user data", http.StatusOK, "success", formatter)
-
-	c.JSON(http.StatusOK, response)
-
-}
-
-func (h *userHandler) FetchStaff(c *gin.Context) {
-
-	currentUser := c.MustGet("currentUser").(user.User)
-
-	formatter := user.FormatUser(currentUser, "")
-
-	response := helper.APIResponse("Successfuly fetch user data", http.StatusOK, "success", formatter)
-
-	c.JSON(http.StatusOK, response)
-
 }

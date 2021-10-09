@@ -3,7 +3,8 @@ package pengajuan
 import "errors"
 
 type Service interface {
-	GetPengajuans(userID int) ([]Pengajuan, error)
+	GetPengajuans() ([]Pengajuan, error)
+	GetPengajuan(userID int) ([]Pengajuan, error)
 	CreatePengajuan(input CreatePengajuanInput) (Pengajuan, error)
 	SaveBuktiKTP(userID int, fileLocation string) (Pengajuan, error)
 	SaveBuktiSlipGaji(userID int, fileLocation string) (Pengajuan, error)
@@ -20,17 +21,17 @@ func NewService(repository Repository) *service {
 	return &service{repository}
 }
 
-func (s *service) GetPengajuans(userID int) ([]Pengajuan, error) {
-	if userID != 0 {
-		pengajuans, err := s.repository.FindByUserID(userID)
-		if err != nil {
-			return pengajuans, err
-		}
-
-		return pengajuans, nil
+func (s *service) GetPengajuans() ([]Pengajuan, error) {
+	pengajuans, err := s.repository.FindAll()
+	if err != nil {
+		return pengajuans, err
 	}
 
-	pengajuans, err := s.repository.FindAll()
+	return pengajuans, nil
+}
+
+func (s *service) GetPengajuan(userID int) ([]Pengajuan, error) {
+	pengajuans, err := s.repository.FindByUserID(userID)
 	if err != nil {
 		return pengajuans, err
 	}
@@ -158,7 +159,7 @@ func (s *service) DeletePengajuan(userID int) error {
 	}
 
 	//find kelengkapan by pengajuan id
-	err = s.repository.Delete(pengajuan.ID)
+	err = s.repository.Delete(pengajuan.UserID, pengajuan.ID)
 	if err != nil {
 		return err
 	}
