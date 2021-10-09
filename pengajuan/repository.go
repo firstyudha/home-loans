@@ -12,7 +12,7 @@ type Repository interface {
 	FindByID(userID int) (Pengajuan, error)
 	Save(pengajuan Pengajuan) (Pengajuan, error)
 	Update(pengajuan Pengajuan) (Pengajuan, error)
-	Delete(userID int, pengajuanID int) error
+	Delete(pengajuanID int) error
 }
 
 type repository struct {
@@ -75,7 +75,7 @@ func (r *repository) Update(pengajuan Pengajuan) (Pengajuan, error) {
 	return pengajuan, nil
 }
 
-func (r *repository) Delete(userID int, pengajuanID int) error {
+func (r *repository) Delete(pengajuanID int) error {
 
 	r.db.Transaction(func(tx *gorm.DB) error {
 
@@ -87,7 +87,7 @@ func (r *repository) Delete(userID int, pengajuanID int) error {
 			panic(kelengkapan.Error)
 		}
 
-		pengajuan := tx.Exec("UPDATE pengajuans SET deleted_at = ? WHERE user_id = ?", time.Now(), userID)
+		pengajuan := tx.Exec("UPDATE pengajuans SET deleted_at = ? WHERE id = ?", time.Now(), pengajuanID)
 
 		//check error update pengajuan, then rollback
 		if pengajuan.Error != nil {

@@ -159,7 +159,7 @@ func (s *service) DeletePengajuan(userID int) error {
 	}
 
 	//find kelengkapan by pengajuan id
-	err = s.repository.Delete(pengajuan.UserID, pengajuan.ID)
+	err = s.repository.Delete(pengajuan.ID)
 	if err != nil {
 		return err
 	}
