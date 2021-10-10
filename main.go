@@ -82,11 +82,11 @@ func main() {
 	api.PUT("/pengajuan/status/:user_id", staffMiddleware(authService, userService), pengajuanHandler.UpdatePengajuanStatus)
 
 	//kelengkapan endpoint user
+	api.GET("/kelengkapan", userMiddleware(authService, userService), kelengkapanHandler.GetKelengkapans)
 	api.POST("/kelengkapan", userMiddleware(authService, userService), kelengkapanHandler.CreateKelengkapan)
 	api.PUT("/kelengkapan/dokumen-pendukung", userMiddleware(authService, userService), kelengkapanHandler.UploadDokumenPendukung)
 
 	//kelengkapan endpoint staff
-	api.GET("/kelengkapan", staffMiddleware(authService, userService), kelengkapanHandler.GetKelengkapans)
 	api.PUT("/kelengkapan/status/:user_id", staffMiddleware(authService, userService), kelengkapanHandler.UpdateKelengkapanStatus)
 
 	router.Run()

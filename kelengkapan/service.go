@@ -3,7 +3,8 @@ package kelengkapan
 import "errors"
 
 type Service interface {
-	GetKelengkapans(userID int) ([]Kelengkapan, error)
+	GetKelengkapans() ([]Kelengkapan, error)
+	GetKelengkapan(userID int) ([]Kelengkapan, error)
 	CreateKelengkapan(userID int, input CreateKelengkapanInput) (Kelengkapan, error)
 	SaveDokumenPendukung(UserID int, fileLocation string) (Kelengkapan, error)
 	SaveKelengkapanStatus(userID GetKelengkapanInput, input UpdateKelengkapanStatusInput) (Kelengkapan, error)
@@ -17,27 +18,7 @@ func NewService(repository Repository) *service {
 	return &service{repository}
 }
 
-func (s *service) GetKelengkapans(userID int) ([]Kelengkapan, error) {
-
-	//user add params
-	if userID != 0 {
-
-		//find pengajuan id by user id
-		pengajuan_id, err := s.repository.FindPengajuanIDByUserID(userID)
-
-		if err != nil {
-			return []Kelengkapan{}, err
-		}
-
-		if pengajuan_id != 0 {
-			kelengkapans, err := s.repository.FindByPengajuanID(pengajuan_id)
-			if err != nil {
-				return kelengkapans, err
-			}
-
-			return kelengkapans, nil
-		}
-	}
+func (s *service) GetKelengkapans() ([]Kelengkapan, error) {
 
 	//user doesnt user params
 	kelengkapans, err := s.repository.FindAll()
@@ -46,6 +27,22 @@ func (s *service) GetKelengkapans(userID int) ([]Kelengkapan, error) {
 	}
 
 	return kelengkapans, nil
+}
+
+func (s *service) GetKelengkapan(userID int) ([]Kelengkapan, error) {
+	pengajuan_id, err := s.repository.FindPengajuanIDByUserID(userID)
+
+	if err != nil {
+		return []Kelengkapan{}, err
+	}
+
+	kelengkapan, err := s.repository.FindByPengajuanID(pengajuan_id)
+	if err != nil {
+		return kelengkapan, err
+	}
+
+	return kelengkapan, nil
+
 }
 
 func (s *service) CreateKelengkapan(userID int, input CreateKelengkapanInput) (Kelengkapan, error) {

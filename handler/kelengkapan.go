@@ -7,7 +7,6 @@ import (
 	"home-loans/kelengkapan"
 	"home-loans/user"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -23,16 +22,42 @@ func NewKelengkapanHandler(kelengkapanService kelengkapan.Service, authService a
 }
 
 func (h *kelengkapanHandler) GetKelengkapans(c *gin.Context) {
-	userID, _ := strconv.Atoi(c.Query("user_id"))
-	kelengkapans, err := h.kelengkapanService.GetKelengkapans(userID)
-	if err != nil {
-		response := helper.APIResponse("Error to get kelengkapans", http.StatusBadRequest, "error", nil)
+
+	currentUser := c.MustGet("currentUser").(user.User)
+
+	//user not login
+	if currentUser.ID == 0 {
+		response := helper.APIResponse("Unauthorized.", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
-	response := helper.APIResponse("List of kelengkapans", http.StatusOK, "success", kelengkapan.FormatKelengkapans(kelengkapans))
-	c.JSON(http.StatusOK, response)
+	//login as customer
+	if currentUser.LoginAs == 1 {
+		kelengkapans, err := h.kelengkapanService.GetKelengkapan(currentUser.ID)
+		if err != nil {
+			response := helper.APIResponse("Error to get kelengkapans", http.StatusBadRequest, "error", nil)
+			c.JSON(http.StatusBadRequest, response)
+			return
+		}
+
+		response := helper.APIResponse("List of kelengkapans", http.StatusOK, "success", kelengkapan.FormatKelengkapans(kelengkapans))
+		c.JSON(http.StatusOK, response)
+	}
+
+	//login as staff
+	if currentUser.LoginAs == 2 {
+		kelengkapans, err := h.kelengkapanService.GetKelengkapans()
+		if err != nil {
+			response := helper.APIResponse("Error to get kelengkapans", http.StatusBadRequest, "error", nil)
+			c.JSON(http.StatusBadRequest, response)
+			return
+		}
+
+		response := helper.APIResponse("List of kelengkapans", http.StatusOK, "success", kelengkapan.FormatKelengkapans(kelengkapans))
+		c.JSON(http.StatusOK, response)
+	}
+
 }
 
 func (h *kelengkapanHandler) CreateKelengkapan(c *gin.Context) {
