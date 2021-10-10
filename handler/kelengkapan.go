@@ -7,6 +7,7 @@ import (
 	"home-loans/kelengkapan"
 	"home-loans/user"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -41,7 +42,7 @@ func (h *kelengkapanHandler) GetKelengkapans(c *gin.Context) {
 			return
 		}
 
-		response := helper.APIResponse("List of kelengkapans", http.StatusOK, "success", kelengkapan.FormatKelengkapans(kelengkapans))
+		response := helper.APIResponse("Data kelengkapan", http.StatusOK, "success", kelengkapan.FormatKelengkapans(kelengkapans))
 		c.JSON(http.StatusOK, response)
 	}
 
@@ -58,6 +59,20 @@ func (h *kelengkapanHandler) GetKelengkapans(c *gin.Context) {
 		c.JSON(http.StatusOK, response)
 	}
 
+}
+
+func (h *kelengkapanHandler) GetKelengkapanDetail(c *gin.Context) {
+	userID, _ := strconv.Atoi(c.Query("user_id"))
+
+	kelengkapans, err := h.kelengkapanService.GetKelengkapan(userID)
+	if err != nil {
+		response := helper.APIResponse("Error to get kelengkapan", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.APIResponse("Kelengkapan detail", http.StatusOK, "success", kelengkapan.FormatKelengkapans(kelengkapans))
+	c.JSON(http.StatusOK, response)
 }
 
 func (h *kelengkapanHandler) CreateKelengkapan(c *gin.Context) {

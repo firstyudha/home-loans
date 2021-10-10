@@ -42,7 +42,7 @@ func (h *pengajuanHandler) GetPengajuans(c *gin.Context) {
 			return
 		}
 
-		response := helper.APIResponse("List of pengajuans", http.StatusOK, "success", pengajuan.FormatPengajuans(pengajuans))
+		response := helper.APIResponse("Data pengajuan", http.StatusOK, "success", pengajuan.FormatPengajuans(pengajuans))
 		c.JSON(http.StatusOK, response)
 	}
 
@@ -71,7 +71,7 @@ func (h *pengajuanHandler) GetPengajuanDetail(c *gin.Context) {
 		return
 	}
 
-	response := helper.APIResponse("List of pengajuan", http.StatusOK, "success", pengajuan.FormatPengajuans(pengajuans))
+	response := helper.APIResponse("Pengajuan detail", http.StatusOK, "success", pengajuan.FormatPengajuans(pengajuans))
 	c.JSON(http.StatusOK, response)
 }
 

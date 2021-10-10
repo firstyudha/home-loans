@@ -87,6 +87,7 @@ func main() {
 	api.PUT("/kelengkapan/dokumen-pendukung", userMiddleware(authService, userService), kelengkapanHandler.UploadDokumenPendukung)
 
 	//kelengkapan endpoint staff
+	api.GET("/kelengkapan/detail", staffMiddleware(authService, userService), kelengkapanHandler.GetKelengkapanDetail)
 	api.PUT("/kelengkapan/status/:user_id", staffMiddleware(authService, userService), kelengkapanHandler.UpdateKelengkapanStatus)
 
 	router.Run()
